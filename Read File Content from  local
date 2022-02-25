@@ -1,0 +1,37 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Scanner;
+
+public class FileConvertion 
+{
+	public static void main(String args[])
+	{
+		System.out.println("Enter Input Path");
+		Scanner	scanner  = new Scanner(System.in);
+		String sFilePath = scanner.nextLine(); 
+		String sFileContent = sReadFileContentsFromLocal(sFilePath);
+		System.out.println("sFileContent-->>\r\n"+sFileContent);
+	}
+
+	private static String sReadFileContentsFromLocal(String sFilePath) 
+	{
+		String sFileContent	= "";
+		String sBuffer		= "";
+		BufferedReader br 	= null;
+		FileReader fr 		= null;
+		try 
+		{
+			fr 				= new FileReader(sFilePath);
+			br 				= new BufferedReader(fr);
+			while ((sBuffer = br.readLine()) != null)
+			{
+				sFileContent= sFileContent.trim() + "\r\n" + sBuffer.trim();
+			}
+		}
+		catch(Exception e)
+		{
+		}
+
+		return sFileContent;
+	}
+}
