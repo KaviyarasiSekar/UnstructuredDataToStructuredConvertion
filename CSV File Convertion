@@ -1,0 +1,77 @@
+	private static String sCSVFileProcess(String sFileContent) 
+	{
+		String sHeader = sFileContent.substring(0 , sFileContent.indexOf("\r\n"));
+		String sContent= sFileContent.substring(sFileContent.indexOf("\r\n"), sFileContent.length());
+		System.out.println("sHeader----->>" + sHeader);
+		//		System.out.println("sContent---->>" + sContent);
+		//		System.exit(0);
+
+		System.out.println("********* Create Table ************");
+		String[] sHeaderSplit 	= sHeader.split(",");
+		String sColumnList 		= "";
+		String sKeyValues		= "";
+		String sQuery 			= "";
+		if(sHeaderSplit.length < 20)
+		{
+			for(int csv = 0 ; csv < sHeaderSplit.length; csv++)
+			{
+				String sHeaderNames = sHeaderSplit[csv];
+				System.out.println("sHeaderSplit[" + csv + "]---->>"+sHeaderSplit[csv]);
+				String sLength = "varchar(255) NOT NULL DEFAULT ''";
+
+				if(sColumnList.trim().isEmpty())
+				{
+					sColumnList	= "`" + sHeaderNames + "` "+ sLength + ",";
+					sKeyValues  = "KEY `" + sHeaderNames + "` (`" + sHeaderNames + "`),";
+				}
+				else
+				{
+					sColumnList = sColumnList + "\r\n`" + sHeaderNames + "` " + sLength + ",";
+					sKeyValues  = sKeyValues + "\r\nKEY `" + sHeaderNames + "` (`" + sHeaderNames + "`),";
+				}
+			}
+
+			if(sKeyValues.trim().endsWith(","))
+				sKeyValues	= sKeyValues.substring(0, sKeyValues.length()-1);
+
+			sQuery 			= "CREATE TABLE IF NOT EXISTS `" + sTableName + "` ("
+					+ "\r\n`id` bigint(20) NOT NULL AUTO_INCREMENT,\r\n" + sColumnList + "\r\nPRIMARY KEY (`id`),\r\n"+ sKeyValues + "\r\n) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;";			
+
+			sQueryExecution("CSV Create Table" , sQuery);
+		}
+		else
+		{
+			System.out.println("Table Column Header More than 20 need to Check File & Code .....");
+			System.exit(0);
+		}
+		System.out.println("********* Load Data To Table ************");
+		String[] sContentSplit 	= sContent.trim().split("\r\n");
+		String sInsertData		= "";
+
+		for(int csv = 0 ; csv < sContentSplit.length; csv++)
+		{
+			String sContentValues = sContentSplit[csv].replaceAll("'", "\\\\'");
+
+			if(sContentValues.contains("\""))
+			{
+				String[] results = StringUtils.substringsBetween(sContentValues, "\"", "\"");
+				String sTemp	 = results[0].replace(",", "<sManualTagFromCode>");
+				sContentValues	 = sContentValues.replace(results[0], sTemp);
+			}
+			sContentValues = sContentValues.replace(",", "','");
+			sContentValues = sContentValues.replace("<sManualTagFromCode>", ",");
+			String sTempIn = "insert into " + sDatabaseName + "." + sTableName + "(" + sHeader + ") values('" + sContentValues + "');";
+
+			if(sInsertData.trim().equals("") && !sContentValues.trim().equals(""))
+			{
+				sInsertData		 = sTempIn;
+			}
+			else
+			{
+				sInsertData		 = sInsertData + "\r\n" + sTempIn;				
+			}
+		}
+
+		System.out.println("sInsertData--final-->>"+sInsertData);
+		return sInsertData;
+	}
