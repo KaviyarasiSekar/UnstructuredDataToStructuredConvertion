@@ -1,0 +1,40 @@
+	private static String sJsonFileProcess(String sFileContent) 
+	{
+		int count_line 			= 0;
+		String InputJson   		= sFileContent;
+
+		JsonFactory factory 	= new JsonFactory();
+		ObjectMapper mapper 	= new ObjectMapper(factory);
+		JsonNode rootNode;
+
+		try 
+		{
+			rootNode = mapper.readTree(InputJson);
+			Iterator<Map.Entry<String,JsonNode>> fieldsIterator = rootNode.fields();
+
+			while (fieldsIterator.hasNext()) 
+			{
+				count_line = count_line +1;
+				Map.Entry<String,JsonNode> field = fieldsIterator.next();
+				String json_getKey      	= field.getKey().toString();
+				String json_getValue      	= field.getValue().toString();
+
+				System.out.println("json_getKey---->>"+json_getKey);
+				System.out.println("json_getValue---->>"+json_getValue);
+
+				if(!json_getValue.contains("{") && !json_getValue.contains("["))
+				{
+					System.out.println("No Need TO Extract Values.....");
+				}
+				else if(json_getValue.contains("{"))
+				{
+					String sInnerJsonValues = sExtractInnerJson(json_getValue);
+				}
+			}			
+		} catch (IOException e) 
+		{
+			e.printStackTrace();
+		}  
+		System.exit(0);
+		return "";
+	}
